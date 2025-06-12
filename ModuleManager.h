@@ -1,363 +1,215 @@
-#include <valarray>
-#include <vector>
-#include <cstring>
+#ifndef MODULAR_ROBOTICS_MODULEMANAGER_H
+#define MODULAR_ROBOTICS_MODULEMANAGER_H
 
 #include <iostream>
-#include <cmath>
-#include "debug_util.h"
+#include <vector>
+#include <span>
+#include <unordered_set>
+#include <boost/functional/hash.hpp>
+#include <valarray>
+#include <nlohmann/json.hpp>
+#include "ModuleProperties.h"
 
-#ifndef TENSORFINAL_COORDTENSOR_H
-#define TENSORFINAL_COORDTENSOR_H
+// Module Data Storage Constants (Don't change these)
+#define MM_DATA_FULL 0
+#define MM_DATA_INT64 1
+/* Module Data Storage Configuration
+ * FULL: Data stored as ModuleBasic, contains a complete copy of coordinates and properties.
+ * INT64: Data stored as ModuleInt64, much more memory efficient but has limitations:
+ *  - Module coordinates must fall within inclusive range of (0, 0, 0) to (255, 255, 255)
+ *  - Modules may only have up to one property.
+ */
+#ifndef CONFIG_MOD_DATA_STORAGE
+#define CONFIG_MOD_DATA_STORAGE MM_DATA_FULL
+#endif
 
-template <typename T>
-class CoordTensor {
+
+
+class IModuleBasic {
 public:
-    // Constructor, creates a tensor of specified order and axis length.
-    // Order in this case is the amount of coordinates needed to
-    // represent a point in space.
-    // Axis size determines the length of each axis, an axis size of 10
-    // would mean that only the integers 0-9 would be valid coordinates.
-    CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, const std::valarray<int>& originOffset = {});
-
-    // Gets a reference to an ID directly from the internal array, this
-    // is always faster than calling IdAtInternal but requires a pre-calculated
-    // index in order to work.
-    typename std::vector<T>::reference GetElementDirect(int index);
+    [[nodiscard]]
+    virtual const std::valarray<int>& Coords() const = 0;
 
     [[nodiscard]]
-    typename std::vector<T>::const_reference GetElementDirect(int index) const;
+    virtual const ModuleProperties& Properties() const = 0;
 
-    // IdAt returns a reference to the module ID stored at the given
-    // coordinates. An ID of -1 means no module is present.
-    typename std::vector<T>::reference ElementAt(const std::valarray<int>& coords);
+    virtual bool operator==(const IModuleBasic& right) const = 0;
 
-    [[nodiscard]]
-    typename std::vector<T>::const_reference ElementAt(const std::valarray<int>& coords) const;
+    virtual bool operator<(const IModuleBasic& right) const = 0;
 
-    // Identical to IdAt but uses the subscript operator, mostly here to
-    // make moving to CoordTensor easier.
-    typename std::vector<T>::reference operator[](const std::valarray<int>& coords);
-
-    [[nodiscard]]
-    typename std::vector<T>::const_reference operator[](const std::valarray<int>& coords) const;
-
-    // Get a const reference to the internal array
-    [[nodiscard]]
-    const std::vector<T>& GetArrayInternal() const;
-
-    // Get a copy of order
-    [[nodiscard]]
-    int Order() const;
-
-    // Get a copy of axisSize
-    [[nodiscard]]
-    int AxisSize() const;
-
-    // Get a coordinate vector from an index
-    [[nodiscard]]
-    const std::valarray<int>& CoordsFromIndex(int index) const;
-
-    // Get an index from a coordinate vector
-    // (Coordinates do not need to be within bounds)
-    int IndexFromCoords(const std::valarray<int>& coords) const;
-
-    // Assign a value to every position in the tensor
-    void Fill(const typename std::vector<T>::value_type& value);
-
-    void FillFromVector(const std::vector<T>& vec);
-
-    // Comparison Operators
-    bool operator==(const CoordTensor<T>& right) const;
-    bool operator!=(const CoordTensor<T>& right) const;
-private:
-    int _order;
-    // Axis size, useful for bounds checking
-    int _axisSize;
-    // Origin offset
-    std::valarray<int> _offset;
-    // Coordinate multiplier cache for tensors of order > 3
-    std::valarray<int> _axisMultipliers;
-    // Internal array for rapid conversion from index to coordinate
-    std::vector<std::valarray<int>> _coordsInternal;
-    // Internal array responsible for holding module IDs
-    std::vector<T> _arrayInternal;
-    // Internal array responsible for holding slices of _arrayInternal
-    std::vector<T*> _arrayInternal2D;
-    // Internal array responsible for holding slices of _arrayInternal2D
-    std::vector<T**> _arrayInternal3D;
-    // Did you know that calling member function pointers looks really weird?
-    typename std::vector<T>::reference (CoordTensor::*IdAtInternal)(const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference (CoordTensor::*IdAtInternalConst)(const std::valarray<int>& coords) const;
-    typename std::vector<T>::reference (CoordTensor::*IdAtInternalOffset)(const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference (CoordTensor::*IdAtInternalOffsetConst)(const std::valarray<int>& coords) const;
-    // 2nd and 3rd order tensors benefit from specialized IdAt functions
-    typename std::vector<T>::reference ElemAt2ndOrder (const std::valarray<int>& coords);
-    [[nodiscard]]
-    typename std::vector<T>::const_reference ElemAt2ndOrderConst (const std::valarray<int>& coords) const;
-    typename std::vector<T>::reference ElemAt3rdOrder (const std::valarray<int>& coords);
-    [[nodiscard]]
-    typename std::vector<T>::const_reference ElemAt3rdOrderConst (const std::valarray<int>& coords) const;
-    // Generalized IdAtInternal function
-    typename std::vector<T>::reference ElemAtNthOrder (const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference ElemAtNthOrderConst (const std::valarray<int>& coords) const;
-    // Offset IdAt
-    typename std::vector<T>::reference ElemAtNthOrderOffset (const std::valarray<int>& coords);
-    typename std::vector<T>::const_reference ElemAtNthOrderOffsetConst (const std::valarray<int>& coords) const;
+    virtual ~IModuleBasic() = default;
 };
 
-template<typename T>
-bool CoordTensor<T>::operator==(const CoordTensor<T>& right) const {
-    return _arrayInternal == right._arrayInternal;
-}
+// Class holding a pointer to a class implementing IModuleBasic, exists purely for convenience
+class ModuleData final : public IModuleBasic {
+private:
+    std::unique_ptr<IModuleBasic> module;
 
-template<typename T>
-bool CoordTensor<T>::operator!=(const CoordTensor<T>& right) const {
-    return _arrayInternal != right._arrayInternal;
-}
+public:
+    ModuleData(const ModuleData& modData);
 
-template<typename T>
-int CoordTensor<T>::Order() const {
-    return _order;
-}
+    ModuleData(const std::valarray<int>& coords, const ModuleProperties& properties);
 
-template<typename T>
-int CoordTensor<T>::AxisSize() const {
-    return _axisSize;
-}
+    [[nodiscard]]
+    const std::valarray<int>& Coords() const override;
 
-template<typename T>
-const std::valarray<int>& CoordTensor<T>::CoordsFromIndex(int index) const {
-    return _coordsInternal[index];
-}
+    [[nodiscard]]
+    const ModuleProperties& Properties() const override;
 
-template<typename T>
-int CoordTensor<T>::IndexFromCoords(const std::valarray<int> &coords) const {
-    return (coords * _axisMultipliers).sum();
-}
+    bool operator==(const IModuleBasic& right) const override;
 
-template <typename T>
-CoordTensor<T>::CoordTensor(int order, int axisSize, const typename std::vector<T>::value_type& value, const std::valarray<int>& originOffset) {
-    _order = order;
-    _axisSize = axisSize;
-    // Calculate number of elements in tensor
-    int internalSize = (int) std::pow(_axisSize, order);
-    // Resize internal array to accommodate all elements
-    _arrayInternal.resize(internalSize, value);
-    // Setup Index -> Coordinate array
-    _coordsInternal.resize(internalSize);
+    bool operator==(const ModuleData& right) const;
+
+    bool operator<(const IModuleBasic& right) const override;
+
+    ModuleData& operator=(const ModuleData& modData);
+
+    friend class std::hash<ModuleData>;
+};
+
+// Class used to hold bare minimum representation of a module, for use in Configuration class
+class ModuleBasic final : public IModuleBasic {
+private:
+    std::size_t hash = -1;
+
+    bool hashCacheValid = false;
+
     std::valarray<int> coords;
-    coords.resize(order, 0);
-    for (int i = 0; i < internalSize; i++) {
-        _coordsInternal[i] = coords;
-        for (int j = 0; j < order; j++) {
-            if (++coords[j] == axisSize) {
-                coords[j] = 0;
-            } else break;
-        }
-    }
-    // Set size of 2nd order array
-    internalSize = _axisSize;
-    switch (order) {
-        case 3:
-            // 2nd order array will need to be larger if tensor is 3rd order
-            internalSize *= _axisSize;
-        case 2:
-            // Initialize 2nd order array
-            _arrayInternal2D.resize(internalSize);
-            for (int i = 0; i < internalSize; i++) {
-                _arrayInternal2D[i] = &(_arrayInternal[i * _axisSize]);
-            }
-            if (internalSize == _axisSize) {
-                // If internalSize wasn't modified by case 3, then tensor is 2nd order
-                IdAtInternal = &CoordTensor::ElemAt2ndOrder;
-                IdAtInternalConst = &CoordTensor::ElemAt2ndOrderConst;
-                DEBUG("2nd order tensor created\n");
-                break;
-            }
-            // Otherwise tensor is 3rd order
-            // Initialize 3rd order array
-            _arrayInternal3D.resize(_axisSize);
-            for (int i = 0; i < _axisSize; i++) {
-                _arrayInternal3D[i] = &(_arrayInternal2D[i * _axisSize]);
-            }
-            IdAtInternal = &CoordTensor::ElemAt3rdOrder;
-            IdAtInternalConst = &CoordTensor::ElemAt3rdOrderConst;
-            DEBUG("3rd order tensor created\n");
-            break;
-        default:
-            // Use coordinate multiplier cache for arbitrary dimensions
-            IdAtInternal = &CoordTensor::ElemAtNthOrder;
-            IdAtInternalConst = &CoordTensor::ElemAtNthOrderConst;
-            DEBUG("Tensor of order " << order << " created\n");
-    }
-    // If the tensor is not 2nd or 3rd order then the
-    // coordinate multiplier cache needs to be set up
-    // Also useful for index caching
-    _axisMultipliers.resize(order);
-    int multiplier = 1;
-    for (int i = 0; i < order; i++) {
-        _axisMultipliers[i] = multiplier;
-        multiplier *= _axisSize;
-    }
-    // Offset setup
-    if (originOffset.size() != 0) {
-        _offset = originOffset;
-        IdAtInternalOffset = IdAtInternal;
-        IdAtInternalOffsetConst = IdAtInternalConst;
-        IdAtInternal = &CoordTensor::ElemAtNthOrderOffset;
-        IdAtInternalConst = &CoordTensor::ElemAtNthOrderOffsetConst;
-    }
-#ifndef NDEBUG
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "ConstantConditionsOC"
-#pragma ide diagnostic ignored "UnreachableCode"
-    std::cout << "IdAtInternal Function: " << (
-            IdAtInternal == &CoordTensor::ElemAt3rdOrder ? "ElemAt3rdOrder" :
-            IdAtInternal == &CoordTensor::ElemAt2ndOrder ? "ElemAt2ndOrder" :
-            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "ElemAtNthOrder" :
-            IdAtInternal == &CoordTensor::ElemAtNthOrderOffset ? "ElemAtNthOrderOffset" :
-            "Invalid Function!") << std::endl;
-#pragma clang diagnostic pop
-#endif
-}
+
+    ModuleProperties properties;
+
+public:
+    ModuleBasic() = default;
+
+    ModuleBasic(const std::valarray<int>& coords, const ModuleProperties& properties);
+
+    const std::valarray<int>& Coords() const override;
+
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
+
+    friend class std::hash<ModuleBasic>;
+};
+
+// Class used to represent a module as a single 64-bit integer. Conditions for proper functionality:
+// - Modules coordinates must fall within (inclusive) range (0, 0, 0) to (255, 255, 255)
+// - Modules may only have a single property, which must be able to be represented flawlessly using <= 40 bits
+class ModuleInt64 final : public IModuleBasic {
+private:
+    std::uint_fast64_t modInt;
+
+    static std::unordered_map<std::uint_fast64_t, ModuleProperties> propertyMap;
+
+    static std::unordered_map<std::uint_fast64_t, std::valarray<int>> coordMap;
+public:
+    ModuleInt64(const std::valarray<int>& coords, const ModuleProperties& properties);
+
+    [[nodiscard]]
+    const std::valarray<int>& Coords() const override;
+
+    [[nodiscard]]
+    const ModuleProperties& Properties() const override;
+
+    bool operator==(const IModuleBasic& right) const override;
+
+    bool operator<(const IModuleBasic& right) const override;
+
+    friend class std::hash<ModuleData>;
+};
 
 template<>
-inline CoordTensor<bool>::CoordTensor(int order, int axisSize, const typename std::vector<bool>::value_type& value, const std::valarray<int>& originOffset) {
-    _order = order;
-    _axisSize = axisSize;
-    // Calculate number of elements in tensor
-    int internalSize = (int) std::pow(_axisSize, order);
-    // Resize internal array to accommodate all elements
-    _arrayInternal.resize(internalSize, value);
-    // Setup Index -> Coordinate array
-    _coordsInternal.resize(internalSize);
+struct std::hash<ModuleData> {
+    std::size_t operator()(const ModuleData& modData) const noexcept;
+};
+
+template<>
+struct boost::hash<ModuleData> {
+    std::size_t operator()(const ModuleData& modData) const noexcept;
+};
+
+template<>
+struct std::hash<ModuleBasic> {
+    std::size_t operator()(ModuleBasic& modData) const noexcept;
+};
+
+template<>
+struct boost::hash<ModuleBasic> {
+    std::size_t operator()(const ModuleBasic& modData) const noexcept;
+};
+
+// Class used to hold info about each module
+class Module {
+public:
+    // Coordinate information
     std::valarray<int> coords;
-    coords.resize(order, 0);
-    for (int i = 0; i < internalSize; i++) {
-        _coordsInternal[i] = coords;
-        for (int j = 0; j < order; j++) {
-            if (++coords[j] == axisSize) {
-                coords[j] = 0;
-            } else break;
-        }
-    }
-    // If the tensor is not 2nd or 3rd order then the
-    // coordinate multiplier cache needs to be set up
-    _axisMultipliers.resize(order);
-    int multiplier = 1;
-    for (int i = 0; i < order; i++) {
-        _axisMultipliers[i] = multiplier;
-        multiplier *= _axisSize;
-    }
-    IdAtInternal = &CoordTensor::ElemAtNthOrder;
-    IdAtInternalConst = &CoordTensor::ElemAtNthOrderConst;
-    DEBUG("Tensor of order " << order << " created\n");
-    // Offset setup
-    if (originOffset.size() != 0) {
-        _offset = originOffset;
-        IdAtInternalOffset = IdAtInternal;
-        IdAtInternalOffsetConst = IdAtInternalConst;
-        IdAtInternal = &CoordTensor::ElemAtNthOrderOffset;
-        IdAtInternalConst = &CoordTensor::ElemAtNthOrderOffsetConst;
-    }
-#ifndef NDEBUG
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "ConstantConditionsOC"
-#pragma ide diagnostic ignored "UnreachableCode"
-    std::cout << "IdAtInternal Function: " << (
-            IdAtInternal == &CoordTensor::ElemAtNthOrder ? "ElemAtNthOrder" :
-            IdAtInternal == &CoordTensor::ElemAtNthOrderOffset ? "ElemAtNthOrderOffset" :
-            "Invalid Function!") << std::endl;
-#pragma clang diagnostic pop
-#endif
-}
+    // Static module check
+    bool moduleStatic = false;
+    // Properties
+    ModuleProperties properties;
+    // Module ID
+    int id;
 
-template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::GetElementDirect(int index) {
-    return _arrayInternal[index];
-}
+    Module(Module&& mod) noexcept;
 
-template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::GetElementDirect(int index) const {
-    return _arrayInternal[index];
-}
+    explicit Module(const std::valarray<int>& coords, bool isStatic = false, const nlohmann::basic_json<>& propertyDefs = {});
+};
 
-template <typename T>
-inline typename std::vector<T>::reference CoordTensor<T>::ElementAt(const std::valarray<int>& coords) {
-    // Told you calling member function pointers looks weird
-    return (this->*IdAtInternal)(coords);
-    // This would look even worse if IdAtInternal were called from outside,
-    // it'd look like this: (tensor3D.*(tensor3D.IdAtInternal))({8, 4, 6}) <-- Not Good
-}
+struct DeferredModCnstrArgs {
+    std::valarray<int> coords;
+    bool isStatic;
+    nlohmann::basic_json<> propertyDefs;
+};
 
-template <typename T>
-inline typename std::vector<T>::const_reference CoordTensor<T>::ElementAt(const std::valarray<int>& coords) const {
-    return (this->*IdAtInternalConst)(coords);
-}
+// Class responsible for module ID assignment and providing a central place where modules are stored
+class ModuleIdManager {
+private:
+    // ID to be assigned to next module during construction
+    static int _nextId;
+    // Vector holding info needed to construct non-static modules
+    static std::vector<DeferredModCnstrArgs> _deferredInitMods;
+    // Vector holding all modules, indexed by module ID, starting with non-static modules
+    static std::vector<Module> _modules;
+    // ID of first static module
+    static int _staticStart;
 
-template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::ElemAt2ndOrder (const std::valarray<int>& coords) {
-    return _arrayInternal2D[coords[1]][coords[0]];
-}
+public:
+    // Never instantiate ModuleIdManager
+    ModuleIdManager() = delete;
+    ModuleIdManager(const ModuleIdManager&) = delete;
 
-template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::ElemAt2ndOrderConst (const std::valarray<int>& coords) const {
-    return _arrayInternal2D[coords[1]][coords[0]];
-}
+    // Register a new module
+    static void RegisterModule(const std::valarray<int>& coords, bool isStatic, const nlohmann::basic_json<>& propertyDefs = {}, bool deferred = false);
 
-template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::ElemAt3rdOrder (const std::valarray<int>& coords) {
-    return _arrayInternal3D[coords[2]][coords[1]][coords[0]];
-}
+    // Register static modules after non-static modules
+    static void DeferredRegistration();
 
-template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::ElemAt3rdOrderConst (const std::valarray<int>& coords) const {
-    return _arrayInternal3D[coords[2]][coords[1]][coords[0]];
-}
+    // Get ID for assignment to newly created module
+    [[nodiscard]]
+    static int GetNextId();
 
-template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::ElemAtNthOrder (const std::valarray<int>& coords) {
-    return _arrayInternal[(coords * _axisMultipliers).sum()];
-}
+    // Get vector of modules
+    static std::vector<Module>& Modules();
 
-template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::ElemAtNthOrderConst (const std::valarray<int>& coords) const {
-    return _arrayInternal[(coords * _axisMultipliers).sum()];
-}
+    // Get span of non-static modules
+    static std::span<Module>& FreeModules();
 
-template <typename T>
-typename std::vector<T>::reference CoordTensor<T>::operator[](const std::valarray<int>& coords) {
-    return (this->*IdAtInternal)(coords);
-}
+    // Get span of static modules
+    static std::span<Module>& StaticModules();
 
-template <typename T>
-typename std::vector<T>::const_reference CoordTensor<T>::operator[](const std::valarray<int>& coords) const {
-    return (this->*IdAtInternalConst)(coords);
-}
+    // Get module by ID
+    static Module& GetModule(int id);
 
-template <typename T>
-const std::vector<T>& CoordTensor<T>::GetArrayInternal() const {
-    return _arrayInternal;
-}
+    // Get index of first static module
+    static int MinStaticID();
 
-template <typename T>
-inline typename std::vector<T>::reference CoordTensor<T>::ElemAtNthOrderOffset (const std::valarray<int>& coords) {
-    return (this->*IdAtInternalOffset)(coords + _offset);
-}
+    // Destroy all modules
+    static void CleanupModules();
+};
 
-template <typename T>
-inline typename std::vector<T>::const_reference CoordTensor<T>::ElemAtNthOrderOffsetConst (const std::valarray<int>& coords) const {
-    return (this->*IdAtInternalOffsetConst)(coords + _offset);
-}
+// Stream insertion operator overloaded for easy printing of module info
+std::ostream& operator<<(std::ostream& out, const Module& mod);
 
-template<typename T>
-void CoordTensor<T>::Fill(const typename std::vector<T>::value_type& value) {
-    std::memset(_arrayInternal.data(), value, sizeof(_arrayInternal));
-}
-
-template<typename T>
-void CoordTensor<T>::FillFromVector(const std::vector<T>& vec) {
-    _arrayInternal = vec;
-}
-
-#endif //TENSORFINAL_COORDTENSOR_H
+#endif //MODULAR_ROBOTICS_MODULEMANAGER_H
