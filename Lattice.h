@@ -3,7 +3,7 @@
 
 #include <set>
 #include "../modules/ModuleManager.h"
-#include "../coordtensor/CoordTensor.h"
+#include "CoordTensor.h"
 
 // Verbosity Constants (Don't change these)
 #define LAT_LOG_NONE 0
