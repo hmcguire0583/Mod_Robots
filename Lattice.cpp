@@ -4,7 +4,7 @@
 #include <sstream>
 #include <string>
 #include <map>
-#include "../utility/debug_util.h"
+#include "debug_util.h"
 #include "../utility/color_util.h"
 #include "Lattice.h"
 
