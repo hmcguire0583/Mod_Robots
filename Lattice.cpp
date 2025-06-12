@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 #include "debug_util.h"
-#include "../utility/color_util.h"
+#include "color_util.h"
 #include "Lattice.h"
 
 const std::vector<std::valarray<int>> LatticeUtils::cubeAdjOffsets = {
