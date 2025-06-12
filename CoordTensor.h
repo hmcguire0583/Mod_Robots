@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <cmath>
-#include "../utility/debug_util.h"
+#include "debug_util.h"
 
 #ifndef TENSORFINAL_COORDTENSOR_H
 #define TENSORFINAL_COORDTENSOR_H
