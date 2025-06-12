@@ -2,7 +2,7 @@
 #define MODULAR_ROBOTICS_LATTICE_H
 
 #include <set>
-#include "../modules/ModuleManager.h"
+#include "ModuleManager.h"
 #include "CoordTensor.h"
 
 // Verbosity Constants (Don't change these)
