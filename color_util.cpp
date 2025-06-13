@@ -1,3 +1,4 @@
+
 #include "color_util.h"
 
 namespace Colors {
@@ -28,8 +29,7 @@ namespace Colors {
     };
 
     ColorsRGB ConvertColorNameToRGB(const std::string& colorName) {
-        auto it = colorToRGB.find(colorName);
-        if (it != colorToRGB.end()) {
+        if (const auto it = colorToRGB.find(colorName); it != colorToRGB.end()) {
             return it->second;
         }
         return ColorsRGB(0);
