@@ -1,4 +1,3 @@
-
 #include <valarray>
 #include <vector>
 #include <cstring>
