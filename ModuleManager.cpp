@@ -1,3 +1,4 @@
+
 #include <set>
 #include "Lattice.h"
 #include "debug_util.h"

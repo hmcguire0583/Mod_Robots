@@ -1,4 +1,3 @@
-
 #include "color_util.h"
 
 namespace Colors {

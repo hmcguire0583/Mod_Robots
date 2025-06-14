@@ -1,4 +1,3 @@
-
 #ifndef MODULEPROPERTIES_H
 #define MODULEPROPERTIES_H
 #include <string>
