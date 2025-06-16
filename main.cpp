@@ -2,7 +2,7 @@
 #include <iostream>
 #include <getopt.h>
 #include <string>
-#include "moves/MoveManager.h"
+//#include "moves/MoveManager.h"
 #include "search/ConfigurationSpace.h"
 #include <boost/format.hpp>
 #include <nlohmann/json.hpp>
