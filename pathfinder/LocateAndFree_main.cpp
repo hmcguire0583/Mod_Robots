@@ -10,7 +10,7 @@
 #include "moves/Scenario.h"
 #include "search/SearchAnalysis.h"
 #include "search/HeuristicCache.h"
-//#include "LocateAndFree/LocateAndFree.h"
+#include "LocateAndFree/LocateAndFree.h"
 
 int main(int argc, char* argv[]) {
     std::string initialFile;
@@ -112,8 +112,7 @@ int main(int argc, char* argv[]) {
     LatticeSetup::SetupFromJson(initialFile);
     std::cout << "Lattice initialized." << std::endl;
 
-    Lattice::LAF();
-    std::cout << Lattice::ToString() << std::endl;
+    LocateAndFree::LocAndFree();
 
     return 0;
 }
