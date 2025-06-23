@@ -1,10 +1,10 @@
-
 #ifndef MODULAR_ROBOTICS_LATTICE_H
 #define MODULAR_ROBOTICS_LATTICE_H
 
 #include <set>
-#include "ModuleManager.h"
-#include "CoordTensor.h"
+#include "../modules/ModuleManager.h"
+#include "../coordtensor/CoordTensor.h"
+//#include "../LocateAndFree/LocateAndFree.h"
 
 // Verbosity Constants (Don't change these)
 #define LAT_LOG_NONE 0
@@ -58,6 +58,8 @@ private:
     static int moduleCount;
     // Vector of movable modules
     static std::vector<Module*> movableModules;
+    // Leaf node from DFS for print
+    static int leafNode;
 
     // Clear adjacency list for module ID, and remove module ID from other lists
     static void ClearAdjacencies(int moduleId);
@@ -123,6 +125,10 @@ public:
     static int AxisSize();
 
     static std::string ToString();
+
+    static void LAF();
+
+    static void LocAndFree(int u, std::vector<bool>& visited, std::vector<int>& parent, bool& foundLeaf);
 
     friend class MoveManager;
 };

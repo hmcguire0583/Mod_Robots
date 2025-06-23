@@ -3,8 +3,8 @@
 #include <sstream>
 #include <string>
 #include <map>
-#include "debug_util.h"
-#include "color_util.h"
+#include "../utility/debug_util.h"
+#include "../utility/color_util.h"
 #include "Lattice.h"
 
 const std::vector<std::valarray<int>> LatticeUtils::cubeAdjOffsets = {
@@ -37,6 +37,7 @@ int Lattice::axisSize;
 int Lattice::boundarySize;
 int Lattice::time = 0;
 int Lattice::moduleCount = 0;
+int Lattice::leafNode = -1;
 bool Lattice::ignoreProperties = false;
 std::valarray<int> Lattice::boundaryOffset;
 std::vector<Module*> Lattice::movableModules;
@@ -535,9 +536,13 @@ std::string Lattice::ToString() {
                     nextColorId++;
                 }
             }
-        } else if (id >= 0) {
+        } else if (id >= 0 && id != leafNode) {
             out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');
-        } else if (id == FREE_SPACE) {
+        } 
+        else if (id == leafNode) {
+            out << 'X';
+        }
+        else if (id == FREE_SPACE) {
             out << '-';
         } else {
             out << "⋅";
@@ -547,4 +552,36 @@ std::string Lattice::ToString() {
         }
     }
     return out.str();
+}
+
+void Lattice::LAF() {
+    int start = 0;
+    std::vector<bool> visited(moduleCount, false);
+    std::vector<int> parent(moduleCount, -1);
+    bool foundLeaf = false;
+
+    LocAndFree(start, visited, parent, foundLeaf);
+}
+
+void Lattice::LocAndFree(const int u, std::vector<bool>& visited, std::vector<int>& parent, bool& found) {
+    if (found) return;
+
+    visited[u] = true;
+
+    bool hasUnvisitedChildren = false;
+
+    for (const int v : adjList[u]) {
+        if (!visited[v]) {
+            parent[v] = u;
+            hasUnvisitedChildren = true;
+            LocAndFree(v, visited, parent, found);
+        }
+    }
+
+    if (!hasUnvisitedChildren) {
+        std::cout << "Leaf node found: " << u << std::endl;
+        found = true;
+        leafNode = u;
+        return;
+    }
 }
