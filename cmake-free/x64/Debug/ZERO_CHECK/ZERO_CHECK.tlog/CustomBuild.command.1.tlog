@@ -1,0 +1,10 @@
+^C:\USERS\OWNER\MOD_ROBOTS\CMAKE-FREE\CMAKEFILES\9D3FEE5C7CA52527EF5CE3DB2D36A4D9\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Owner/Mod_Robots -BC:/Users/Owner/Mod_Robots/cmake-free --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/Users/Owner/Mod_Robots/cmake-free/Pathfinder.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

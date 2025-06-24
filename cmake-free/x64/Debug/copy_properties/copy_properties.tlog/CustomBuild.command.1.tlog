@@ -1,0 +1,20 @@
+^C:\USERS\OWNER\MOD_ROBOTS\CMAKE-FREE\CMAKEFILES\9D3FEE5C7CA52527EF5CE3DB2D36A4D9\COPY_PROPERTIES.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory "C:/Users/Owner/Mod_Robots/Module Properties" "C:/Users/Owner/Mod_Robots/cmake-free/Module Properties"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\OWNER\MOD_ROBOTS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/Owner/Mod_Robots -BC:/Users/Owner/Mod_Robots/cmake-free --check-stamp-file C:/Users/Owner/Mod_Robots/cmake-free/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

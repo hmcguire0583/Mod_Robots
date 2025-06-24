@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "PropertyLib.dir\\Debug\\ModuleProperties.obj",
+            "outputs": [
+                "C:\\Users\\Owner\\Mod_Robots\\cmake-free\\PropertyLib.dir\\Debug\\vc143.pdb",
+                "PropertyLib.dir\\Debug\\"
+            ],
+            "requires": []
+        }
+    ]
+}

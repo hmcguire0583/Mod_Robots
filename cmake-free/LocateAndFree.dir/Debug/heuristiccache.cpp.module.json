@@ -1,0 +1,14 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "LocateAndFree.dir\\Debug\\HeuristicCache.obj",
+            "outputs": [
+                "C:\\Users\\Owner\\Mod_Robots\\cmake-free\\LocateAndFree.dir\\Debug\\vc143.pdb",
+                "LocateAndFree.dir\\Debug\\"
+            ],
+            "requires": []
+        }
+    ]
+}
