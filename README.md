@@ -28,4 +28,4 @@ cmake --build ./cmake-build --target ColorPropertyLib
 cmake --build ./cmake-build --target OrientationPropertyLib
 
 # Sample execution run
-.\cmake-build\LocateAndFree.exe -I C:\Users\Owner\Mod_Robots\testing-robots\initial.json -F C:\Users\Owner\Mod_Robots\testing-robots\final.json -e harry
+.\cmake-build\LocateAndFree.exe -I C:\Users\Owner\Mod_Robots\testing-robots\initial.json -F C:\Users\Owner\Mod_Robots\testing-robots\final.json -e test
