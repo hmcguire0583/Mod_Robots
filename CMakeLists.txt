@@ -145,6 +145,8 @@ foreach (TARGET ${Targets})
 endforeach()
 
 add_executable(LocateAndFree
+        pathfinder/LocateAndFree.h
+        pathfinder/LocateAndFree.cpp
         pathfinder/LocateAndFree_main.cpp
         pathfinder/utility/debug_util.h
         pathfinder/modules/ModuleManager.h
