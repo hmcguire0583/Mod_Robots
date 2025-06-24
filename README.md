@@ -13,6 +13,8 @@ Right now its able to find leaf node of a specified json file.
 
 # Installation of vcpkg
 
+git clone https://github.com/microsoft/vcpkg.git
+
 .\vcpkg\vcpkg install
 
 # Commands
