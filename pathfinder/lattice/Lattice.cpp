@@ -37,7 +37,6 @@ int Lattice::axisSize;
 int Lattice::boundarySize;
 int Lattice::time = 0;
 int Lattice::moduleCount = 0;
-int Lattice::leafNode = -1;
 bool Lattice::ignoreProperties = false;
 std::valarray<int> Lattice::boundaryOffset;
 std::vector<Module*> Lattice::movableModules;
@@ -536,13 +535,9 @@ std::string Lattice::ToString() {
                     nextColorId++;
                 }
             }
-        } else if (id >= 0 && id != leafNode) {
+        } else if (id >= 0) {
             out << (ModuleIdManager::GetModule(id).moduleStatic ? '#' : '@');
-        } 
-        else if (id == leafNode) {
-            out << 'X';
-        }
-        else if (id == FREE_SPACE) {
+        } else if (id == FREE_SPACE) {
             out << '-';
         } else {
             out << "⋅";
