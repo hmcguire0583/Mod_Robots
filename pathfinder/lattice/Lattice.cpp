@@ -553,35 +553,3 @@ std::string Lattice::ToString() {
     }
     return out.str();
 }
-
-void Lattice::LAF() {
-    int start = 0;
-    std::vector<bool> visited(moduleCount, false);
-    std::vector<int> parent(moduleCount, -1);
-    bool foundLeaf = false;
-
-    LocAndFree(start, visited, parent, foundLeaf);
-}
-
-void Lattice::LocAndFree(const int u, std::vector<bool>& visited, std::vector<int>& parent, bool& found) {
-    if (found) return;
-
-    visited[u] = true;
-
-    bool hasUnvisitedChildren = false;
-
-    for (const int v : adjList[u]) {
-        if (!visited[v]) {
-            parent[v] = u;
-            hasUnvisitedChildren = true;
-            LocAndFree(v, visited, parent, found);
-        }
-    }
-
-    if (!hasUnvisitedChildren) {
-        std::cout << "Leaf node found: " << u << std::endl;
-        found = true;
-        leafNode = u;
-        return;
-    }
-}
