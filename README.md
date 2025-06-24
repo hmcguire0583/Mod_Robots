@@ -1,5 +1,6 @@
 # Locate and Free DFS.
 Implementation of the locate and free algorithm by DFS -> Harry, Russ, and Fouad
+
 Right now its able to find leaf node of a specified json file.
 
 # TO DO:
