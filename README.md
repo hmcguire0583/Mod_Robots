@@ -1,7 +1,7 @@
 # Mod_Robots
 Implementation of the locate and free algorithm by DFS -> Harry, Russ, and Fouad
 
-TO DO:
+# TO DO:
 1. Take code made and make new LocateAndFree class
     - Make a friend to Lattice
 2. Create function to find the start S (Greatest Z, then smallest X & Y)
@@ -12,9 +12,13 @@ TO DO:
 # Commands
 
 mkdir ./cmake-free
+
 cmake -S . -B cmake-free -DCMAKE_TOOLCHAIN_FILE="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
 cmake --build ./cmake-free --target LocateAndFree
+
 cmake --build ./cmake-free --target ColorPropertyLib
+
 cmake --build ./cmake-free --target OrientationPropertyLib
 
 # Sample test run
