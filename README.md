@@ -13,15 +13,15 @@ Right now its able to find leaf node of a specified json file.
    
 # Commands
 
-mkdir ./cmake-free
+mkdir ./cmake-build
 
-cmake -S . -B cmake-free -DCMAKE_TOOLCHAIN_FILE="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
+cmake -S . -B cmake-build -DCMAKE_TOOLCHAIN_FILE="$PWD/vcpkg/scripts/buildsystems/vcpkg.cmake"
 
-cmake --build ./cmake-free --target LocateAndFree
+cmake --build ./cmake-build --target LocateAndFree
 
-cmake --build ./cmake-free --target ColorPropertyLib
+cmake --build ./cmake-build --target ColorPropertyLib
 
-cmake --build ./cmake-free --target OrientationPropertyLib
+cmake --build ./cmake-build --target OrientationPropertyLib
 
 # Sample execution run
-.\cmake-free\LocateAndFree.exe -I C:\Users\Owner\Mod_Robots\testing-robots\initial.json -F C:\Users\Owner\Mod_Robots\testing-robots\final.json -e harry
+.\cmake-build\LocateAndFree.exe -I C:\Users\Owner\Mod_Robots\testing-robots\initial.json -F C:\Users\Owner\Mod_Robots\testing-robots\final.json -e harry
