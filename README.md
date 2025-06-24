@@ -15,7 +15,9 @@ Right now its able to find leaf node of a specified json file.
 
 git clone https://github.com/microsoft/vcpkg.git
 
-.\vcpkg\vcpkg install
+cd vcpkg
+
+.\bootstrap-vcpkg.bat
 
 # Commands
 
