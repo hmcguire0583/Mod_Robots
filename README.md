@@ -10,7 +10,11 @@ Right now its able to find leaf node of a specified json file.
 3. Find a way to print path of DFS (starting from S)
 4. After the end of DFS move block one direction Towards smallest
 5. Create a configuration in 3d to test.
-   
+
+# Installation of vcpkg
+
+.\vcpkg\vcpkg install
+
 # Commands
 
 mkdir ./cmake-build
