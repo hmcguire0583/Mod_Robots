@@ -11,9 +11,7 @@
 #include "search/SearchAnalysis.h"
 #include "search/HeuristicCache.h"
 #include "LocateAndFree/LocateAndFree.h"
-#include "module/Module.h"
-#include "properties/Colors.h"
-#include <memory>
+
 
 int main(int argc, char* argv[]) {
     std::string initialFile;
