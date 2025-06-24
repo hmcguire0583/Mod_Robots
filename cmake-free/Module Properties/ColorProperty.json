@@ -1,0 +1,18 @@
+{
+  "filename": "ColorPropertyLib",
+  "name": "colorProperty",
+  "propertyClass": "Const",
+  "staticFunctions": [
+    "Palette"
+  ],
+  "instanceFunctions": [
+    "GetColorInt"
+  ],
+  "argumentInstanceFunctions": [
+    "IsColor"
+  ]
+<<<<<<< HEAD
+}
+=======
+}
+>>>>>>> 4a21b79 (Add Module Properties and update build setup)
