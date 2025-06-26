@@ -126,10 +126,6 @@ int main(int argc, char* argv[]) {
 
     LocateAndFree::LocAndFree();
 
-    // Print final lattice state
-    std::cout << "\nFinal Lattice State:" << std::endl;
-    std::cout << Lattice::ToString() << std::endl;
-
     // Export to scen file only if -e flag was used
     if (exportRequested) {
         // Store final configuration
@@ -150,7 +146,6 @@ int main(int argc, char* argv[]) {
         Scenario::ExportToScenFile(path, scenInfo);
         std::cout << "Results exported to: " << exportFile << std::endl;
 
-        // Clean up dynamically allocated start configuration
         delete start;
     }
 
