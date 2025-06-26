@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
                 break;
             case 'e':
                 exportFile = optarg;
-                exportRequested = true;  // Mark that export was requested
+                exportRequested = true;  // export was requested
                 break;
             case '?':
                 break;
@@ -95,8 +95,7 @@ int main(int argc, char* argv[]) {
             }
         }
     }
-
-    // Only generate export file name if -e flag was used but no filename provided
+    // Generate names for export file if not specified
     if (exportRequested && exportFile.empty()) {
         exportFile = std::filesystem::path(initialFile).replace_extension(".scen").string();
         if ((trimPos = exportFile.find("_initial")) != std::string::npos) {
@@ -118,7 +117,6 @@ int main(int argc, char* argv[]) {
     std::cout << "\nInitial Lattice State:" << std::endl;
     std::cout << Lattice::ToString() << std::endl;
 
-    // Store initial configuration for export (only if export requested)
     Configuration* start = nullptr;
     if (exportRequested) {
         start = new Configuration(Lattice::GetModuleInfo());
@@ -126,12 +124,8 @@ int main(int argc, char* argv[]) {
 
     LocateAndFree::LocAndFree();
 
-    // Export to scen file only if -e flag was used
     if (exportRequested) {
-        // Store final configuration
         Configuration end(Lattice::GetModuleInfo());
-
-        // Create path with initial and final configurations
         std::vector<const Configuration*> path;
         path.push_back(start);
         path.push_back(&end);
