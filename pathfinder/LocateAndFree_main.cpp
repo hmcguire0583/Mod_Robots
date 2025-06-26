@@ -12,17 +12,19 @@
 #include "search/HeuristicCache.h"
 #include "LocateAndFree/LocateAndFree.h"
 
+
 int main(int argc, char* argv[]) {
     std::string initialFile;
     std::string finalFile;
     std::string exportFile;
+    //
+    //
 
     // Define the long options
     static option long_options[] = {
         {"initial-file", required_argument, nullptr, 'I'},
         {"final-file", required_argument, nullptr, 'F'},
         {"export-file", required_argument, nullptr, 'e'},
-        {nullptr, 0, nullptr, 0}
     };
 
     int option_index = 0;
@@ -100,30 +102,25 @@ int main(int argc, char* argv[]) {
         }
     }
     
-    // Dynamically Link Properties
-    std::cout << "Linking Properties..." << std::endl;
-    ModuleProperties::LinkProperties();
-    std::cout << "Properties successfully linked: " << ModuleProperties::PropertyCount() << std::endl;
-    
     // Preprocess configurations
     LatticeSetup::Preprocess(initialFile, finalFile);
 
     // Set up Lattice
     std::cout << "Initializing Lattice..." << std::endl;
+
     LatticeSetup::adjCheckOverride = CUBE;
+
     LatticeSetup::SetupFromJson(initialFile);
     std::cout << "Lattice initialized." << std::endl;
-
     // Print initial lattice state
     std::cout << "\nInitial Lattice State:" << std::endl;
     std::cout << Lattice::ToString() << std::endl;
 
-    // Run the Locate and Free algorithm
     LocateAndFree::LocAndFree();
 
     // Print final lattice state
     std::cout << "\nFinal Lattice State:" << std::endl;
     std::cout << Lattice::ToString() << std::endl;
-
     return 0;
 }
+
