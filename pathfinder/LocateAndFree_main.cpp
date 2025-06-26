@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
     std::string initialFile;
     std::string finalFile;
     std::string exportFile;
+    bool exportRequested = false;  // Track if -e flag was used
     //
     //
 
@@ -39,6 +40,7 @@ int main(int argc, char* argv[]) {
                 break;
             case 'e':
                 exportFile = optarg;
+                exportRequested = true;  // Mark that export was requested
                 break;
             case '?':
                 break;
@@ -94,8 +96,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // Generate names for export file if not specified
-    if (exportFile.empty()) {
+    // Only generate export file name if -e flag was used but no filename provided
+    if (exportRequested && exportFile.empty()) {
         exportFile = std::filesystem::path(initialFile).replace_extension(".scen").string();
         if ((trimPos = exportFile.find("_initial")) != std::string::npos) {
             exportFile.erase(trimPos, 8);
@@ -116,11 +118,41 @@ int main(int argc, char* argv[]) {
     std::cout << "\nInitial Lattice State:" << std::endl;
     std::cout << Lattice::ToString() << std::endl;
 
+    // Store initial configuration for export (only if export requested)
+    Configuration* start = nullptr;
+    if (exportRequested) {
+        start = new Configuration(Lattice::GetModuleInfo());
+    }
+
     LocateAndFree::LocAndFree();
 
     // Print final lattice state
     std::cout << "\nFinal Lattice State:" << std::endl;
     std::cout << Lattice::ToString() << std::endl;
+
+    // Export to scen file only if -e flag was used
+    if (exportRequested) {
+        // Store final configuration
+        Configuration end(Lattice::GetModuleInfo());
+
+        // Create path with initial and final configurations
+        std::vector<const Configuration*> path;
+        path.push_back(start);
+        path.push_back(&end);
+
+        std::cout << "Exporting results..." << std::endl;
+        Scenario::ScenInfo scenInfo;
+        scenInfo.exportFile = exportFile;
+        scenInfo.scenName = Scenario::TryGetScenName(initialFile);
+        scenInfo.scenDesc = Scenario::TryGetScenDesc(initialFile);
+        scenInfo.scenType = Scenario::TryGetScenType(initialFile);
+        
+        Scenario::ExportToScenFile(path, scenInfo);
+        std::cout << "Results exported to: " << exportFile << std::endl;
+
+        // Clean up dynamically allocated start configuration
+        delete start;
+    }
+
     return 0;
 }
-
