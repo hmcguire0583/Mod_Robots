@@ -1,0 +1,15 @@
+{
+  "order": 3,
+  "axisSize": 5,
+  "modules": [
+    {
+      "position": [3, 2, 2],
+      "static": false,
+      "properties": {
+        "colorProperty": {
+          "color": "black"
+        }
+      }
+    }
+  ]
+}

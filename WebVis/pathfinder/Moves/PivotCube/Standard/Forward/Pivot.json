@@ -1,0 +1,17 @@
+{
+  "moves": [
+    {
+      "name": "Pivot",
+      "order": 2,
+      "def": [[
+        "xx",
+        "?!",
+        "##"
+      ]],
+      "permGen": true,
+      "animSeq": [
+        ["pivot+y", [1, 0, 0]]
+      ]
+    }
+  ]
+}

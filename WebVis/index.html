@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+		<title>WebVis</title>
+
+        <style>
+            html, body {
+                user-select: none;
+                font-family: "-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Arial","sans-serif";
+                margin: 0;
+                height: 100%
+            }
+            .lil-gui {
+                float: left;
+            }
+            .stats {
+                font-family: Menlo,Monaco,Consolas,"Droid Sans Mono",monospace;
+                font-size: small;
+                white-space: pre;
+                color: rgba(255, 255, 255, 0.5);
+                margin-bottom: 0.05em;
+                margin-top: 0.05em;
+                margin-left: calc(0.05em + 2.5px);
+            }
+        </style>
+
+        <script type="importmap"> {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.167.1/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.167.1/examples/jsm/"
+            }
+        } </script>
+    </head>
+    <body>
+        <div style="width:80%; height:2%; position:absolute; top:0; left:0; z-index:1; display:flex;">
+            <div id="controlBar" style="height:100%; z-index:1; float:left;"></div>
+            <div style="height:100%; z-index:1; float:left;">
+                <input id="scenarioUploadButton" type="file" style="z-index:1;"></input>
+            </div>
+        </div>
+        <div class="container" style="width:25%; height:100%; position:absolute; top:0; right:0; z-index:1; pointer-events: none">
+            <div style="height:25%">
+                <canvas id="miniView" style="width:100%;height:100%;display:block; pointer-events: auto"></canvas>
+                <!--<img src="resources/textures/car.png" style="width:20%;aspect-ratio:1;position:absolute; top:calc(25vh - calc(0.2 * 25vw)); right:calc(0.8 * 25vw);"/>-->
+                <canvas id="referenceModule" style="width:20%;aspect-ratio:1;position:absolute; top:calc(25vh - calc(0.2 * 25vw)); right:calc(0.8 * 25vw);;display:block"></canvas>
+                <!--<img src="resources/textures/car.png" style="width:100%;height:100%"/>-->
+            </div>
+            <div style="height:75%;background-color: rgba(0, 0, 0, 0.05)">
+                <div style="height:5px;background-color: rgba(0, 0, 0, 0.05)">
+                    <div id="pathfinderProgressBar" style="height:100%;width:100%;background-color:rgba(255, 255, 255, 0.5)"></div>
+                    <div id="pathfinderReverseProgressBar" style="height:5px;width:0%;background-color:rgba(255, 0, 255, 0.5);position:absolute;top:25vh; right:0"></div>
+                </div>
+                <div id="statsDiv" style="display:none">
+                    <p class="stats">Found:      <span id="found">0</span></p>
+                    <p class="stats">Expanded:   <span id="expanded">0</span></p>
+                    <p class="stats">Unexpanded: <span id="unexpanded">0</span></p>
+                </div>
+                <div id="miniSceneControls" style="height:25px"></div>
+            </div>
+        </div>
+        <div id="infoOverlay" style="width:201px; font-size:30px; position:absolute; bottom:20px; z-index:1; text-align:center;">No Scenario Loaded</div>
+        <canvas id="mainView" style="width:100%;height:100%;display:block;position:absolute;top:0;left:0;"></canvas>
+    </body>
+    <script type="module" src="src/main.js"></script>
+</html>
+
